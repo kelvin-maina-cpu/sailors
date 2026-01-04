@@ -1,13 +1,14 @@
 /* ================= GLOBAL STATE ================= */
 
 // Projects with images
-// Preload demo user if none exists
+// Preload demo user for deployed site
 if (!localStorage.getItem("users")) {
   const demoUsers = [
     { username: "demo", admission: "123", email: "demo@example.com", password: "demo123" }
   ];
   localStorage.setItem("users", JSON.stringify(demoUsers));
 }
+
 
 const projects = [
   { 
@@ -42,6 +43,7 @@ const projectTasks = [
 
 // User progress and points
 let unlockedIndex = parseInt(localStorage.getItem("unlockedIndex")) || 0;
+
 let completedProjects = JSON.parse(localStorage.getItem("completedProjects")) || [];
 let userPoints = parseInt(localStorage.getItem("userPoints")) || 0;
 
@@ -61,30 +63,37 @@ function showPage(id){
 
 /* ================= AUTH FUNCTIONS ================= */
 function registerUser() {
-  try {
-    const username = regUsername().value.trim();
-    const admission = regAdmission().value.trim();
-    const email = regEmail().value.trim();
-    const password = regPassword().value.trim();
+  const username = document.getElementById("reg-username").value.trim();
+  const admission = document.getElementById("reg-admission").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
+  const password = document.getElementById("reg-password").value.trim();
 
-    if (!username || !admission || !email || !password) {
-      alert("Please fill in all fields");
-      return;
-    }
+  if (!username || !admission || !email || !password) {
+    alert("Please fill in all fields.");
+    return;
+  }
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    if (users.find(u => u.username === username || u.admission === admission)) {
-      alert("Username or Admission already exists");
-      return;
-    }
+  let users = JSON.parse(localStorage.getItem("users")) || [];
 
-    users.push({ username, admission, email, password });
-    localStorage.setItem("users", JSON.stringify(users));
+  const exists = users.some(u => u.username === username || u.email === email);
+  if (exists) {
+    alert("Username or email already exists!");
+    return;
+  }
 
-    alert("Account created successfully! Please log in.");
-    showPage("login-page");
-  } catch (err) { console.error(err); }
+  users.push({ username, admission, email, password });
+  localStorage.setItem("users", JSON.stringify(users));
+
+  alert("Account created successfully! Please log in.");
+  
+  document.getElementById("reg-username").value = "";
+  document.getElementById("reg-admission").value = "";
+  document.getElementById("reg-email").value = "";
+  document.getElementById("reg-password").value = "";
+
+  showPage("login-page");
 }
+
 
 function loginUser() {
   try {
@@ -107,6 +116,7 @@ function loginUser() {
     showBadges();
 
   } catch(err){console.error(err);}
+  showPage("portfolio-page");
 }
 
 function logout() {
